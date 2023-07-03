@@ -1,3 +1,3 @@
-import { Add } from './Propose.js';
+import { Propose } from './Propose.js';
 
-export { Add };
+export { Propose };
