@@ -7,7 +7,7 @@
       "feepayerKeyPath": "/home/laurip/.cache/zkapp-cli/keys/devdao.json",
       "feepayerAlias": "devdao",
       "fee": "0.1",
-      "smartContract": "Add"
+      "smartContract": "Propose"
     }
   }
 }

@@ -14,7 +14,7 @@
  */
 import { Mina, PrivateKey } from 'snarkyjs';
 import fs from 'fs/promises';
-import { Add } from './Add.js';
+import { Propose } from './Propose.js';
 
 // check command line arg
 let deployAlias = process.argv[2];
@@ -58,30 +58,30 @@ const fee = Number(config.fee) * 1e9; // in nanomina (1 billion = 1.0 mina)
 Mina.setActiveInstance(Network);
 let feepayerAddress = feepayerKey.toPublicKey();
 let zkAppAddress = zkAppKey.toPublicKey();
-let zkApp = new Add(zkAppAddress);
+let zkApp = new Propose(zkAppAddress);
 
 let sentTx;
 // compile the contract to create prover keys
 console.log('compile the contract...');
-await Add.compile();
-try {
-  // call update() and send transaction
-  console.log('build transaction and create proof...');
-  let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
-    zkApp.update();
-  });
-  await tx.prove();
-  console.log('send transaction...');
-  sentTx = await tx.sign([feepayerKey]).send();
-} catch (err) {
-  console.log(err);
-}
-if (sentTx?.hash() !== undefined) {
-  console.log(`
-Success! Update transaction sent.
+await Propose.compile();
+// try {
+//   // call update() and send transaction
+//   console.log('build transaction and create proof...');
+//   let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
+//     zkApp.update();
+//   });
+//   await tx.prove();
+//   console.log('send transaction...');
+//   sentTx = await tx.sign([feepayerKey]).send();
+// } catch (err) {
+//   console.log(err);
+// }
+// if (sentTx?.hash() !== undefined) {
+//   console.log(`
+// Success! Update transaction sent.
 
-Your smart contract state will be updated
-as soon as the transaction is included in a block:
-https://berkeley.minaexplorer.com/transaction/${sentTx.hash()}
-`);
-}
+// Your smart contract state will be updated
+// as soon as the transaction is included in a block:
+// https://berkeley.minaexplorer.com/transaction/${sentTx.hash()}
+// `);
+// }

@@ -21,7 +21,7 @@ import {
  * This file is safe to delete and replace with your own contract.
  */
 
-export class Add extends SmartContract {
+export class Propose extends SmartContract {
   //@state(Field) num = State<Field>();
   //@state(MyArray3) targets = State<MyArray3>();
 

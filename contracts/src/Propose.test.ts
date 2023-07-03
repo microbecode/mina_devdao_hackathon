@@ -1,4 +1,4 @@
-import { Add } from './Add';
+import { Propose } from './Propose';
 import {
   Field,
   Mina,
@@ -24,10 +24,10 @@ describe('Add', () => {
     senderKey: PrivateKey,
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey,
-    zkApp: Add;
+    zkApp: Propose;
 
   beforeAll(async () => {
-    if (proofsEnabled) await Add.compile();
+    if (proofsEnabled) await Propose.compile();
   });
 
   beforeEach(() => {
@@ -39,7 +39,7 @@ describe('Add', () => {
       Local.testAccounts[1]);
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
-    zkApp = new Add(zkAppAddress);
+    zkApp = new Propose(zkAppAddress);
   });
 
   async function localDeploy() {
@@ -90,5 +90,44 @@ describe('Add', () => {
     const matched = zkApp.matched.get();
 
     expect(matched).toEqual(Bool(true));
+  });
+
+  it('Set proposal fails for wrong signer', async () => {
+    await localDeploy();
+
+    const txn = await Mina.transaction(senderAccount, () => {
+      zkApp.wish(deployerKey, senderAccount);
+    });
+    await txn.prove();
+
+    try {
+      await txn.sign([senderKey]).send();
+      expect(true).toEqual(false); // failure if reached this far
+    } catch (e) {
+      console.log('what', e);
+      // this is expected
+    }
+  });
+
+  it('Accept proposal fails for wrong signer', async () => {
+    await localDeploy();
+
+    const txn = await Mina.transaction(deployerAccount, () => {
+      zkApp.wish(deployerKey, senderAccount);
+    });
+    await txn.prove();
+    await txn.sign([deployerKey]).send();
+
+    try {
+      await Mina.transaction(deployerAccount, () => {
+        zkApp.tryAccept(deployerKey);
+      });
+      expect(true).toEqual(false); // failure if reached this far
+    } catch (e) {
+      // this is expected
+    }
+
+    const matched = zkApp.matched.get();
+    expect(matched).toEqual(Bool(false));
   });
 });
