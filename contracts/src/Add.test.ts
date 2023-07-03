@@ -1,5 +1,12 @@
 import { Add } from './Add';
-import { Field, Mina, PrivateKey, PublicKey, AccountUpdate } from 'snarkyjs';
+import {
+  Field,
+  Mina,
+  PrivateKey,
+  PublicKey,
+  AccountUpdate,
+  Bool,
+} from 'snarkyjs';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -47,21 +54,41 @@ describe('Add', () => {
 
   it('generates and deploys the `Add` smart contract', async () => {
     await localDeploy();
-    const num = zkApp.num.get();
-    expect(num).toEqual(Field(1));
   });
 
-  it('correctly updates the num state on the `Add` smart contract', async () => {
+  it('Set proposal data correctly', async () => {
     await localDeploy();
 
-    // update transaction
-    const txn = await Mina.transaction(senderAccount, () => {
-      zkApp.update();
+    const txn = await Mina.transaction(deployerAccount, () => {
+      zkApp.wish(deployerKey, senderAccount);
     });
     await txn.prove();
-    await txn.sign([senderKey]).send();
+    await txn.sign([deployerKey]).send();
 
-    const updatedNum = zkApp.num.get();
-    expect(updatedNum).toEqual(Field(3));
+    const proposer = zkApp.proposer.get();
+    const proposed = zkApp.proposerChoice.get();
+
+    expect(proposer).toEqual(deployerAccount);
+    expect(proposed).toEqual(senderAccount);
+  });
+
+  it('Accept proposal works', async () => {
+    await localDeploy();
+
+    const txn = await Mina.transaction(deployerAccount, () => {
+      zkApp.wish(deployerKey, senderAccount);
+    });
+    await txn.prove();
+    await txn.sign([deployerKey]).send();
+
+    const txn2 = await Mina.transaction(senderAccount, () => {
+      zkApp.tryAccept(senderKey);
+    });
+    await txn2.prove();
+    await txn2.sign([senderKey]).send();
+
+    const matched = zkApp.matched.get();
+
+    expect(matched).toEqual(Bool(true));
   });
 });
