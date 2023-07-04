@@ -34,4 +34,6 @@ In any case, I learned a lot of Mina while doing this, which was also my origina
 
 MIT for everything.
 
+This project was inspired by the legendary [Fruity Friends](https://devfolio.co/projects/fruity-friends-ef88) project.
+
 Wanna get in touch? Poke me in Telegram (username Lauri_P) or [Twitter](https://twitter.com/LauriPelto).
